@@ -1,4 +1,7 @@
 // lib/pipeline.ts
+/**
+ * @Author Renjith Pillai
+ * */
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as blueprints from '@aws-quickstart/eks-blueprints';
@@ -21,7 +24,7 @@ export default class PipelineConstruct extends Construct {
       .owner("codemato")
       .repository({
           repoUrl: 'my-eks-blueprints',
-          credentialsSecretName: 'github-token',
+          credentialsSecretName: 'github-token-new',
           targetRevision: 'main'
       })
             // WE ADD THE STAGES IN WAVE FROM THE PREVIOUS CODE
