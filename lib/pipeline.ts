@@ -17,7 +17,10 @@ export default class PipelineConstruct extends Construct {
     const blueprint = blueprints.EksBlueprint.builder()
     .account(account)
     .region(region)
-    .addOns(new blueprints.ClusterAutoScalerAddOn)
+    .addOns(
+      new blueprints.ClusterAutoScalerAddOn,
+      new blueprints.KubeviousAddOn(), // New addon goes here
+    ) 
     .teams(new TeamPlatform(account), new TeamApplication('amway',account));
   
     blueprints.CodePipelineStack.builder()
