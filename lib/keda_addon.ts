@@ -10,13 +10,13 @@ import { createNamespace } from '@aws-quickstart/eks-blueprints/dist/utils/names
  */
 export interface KedaAddOnProps extends blueprints.HelmAddOnUserProps {
   version?: string,
-  namespace: string,
+  namespace?: string,
   kedaOperatorName?: string,
   createServiceAccount?: boolean,
   kedaServiceAccountName?: string,
-  podSecurityContextFsGroup?: string,
-  securityContextRunAsGroup?: string,
-  securityContextRunAsUser?: string,
+  podSecurityContextFsGroup?: number,
+  securityContextRunAsGroup?: number,
+  securityContextRunAsUser?: number,
   irsaRoles?: {}
 
 }
@@ -58,7 +58,7 @@ export class KedaAddOn extends blueprints.HelmAddOn {
       const opts = { name: this.options.kedaOperatorName, namespace: this.options.namespace };
       const sa = cluster.addServiceAccount(this.options.kedaServiceAccountName!, opts);
       setRoles(sa,this.options.irsaRoles!)
-      const namespace = createNamespace(this.options.namespace , cluster);
+      const namespace = createNamespace(this.options.namespace! , cluster);
       sa.node.addDependency(namespace);
       
       const chart = this.addHelmChart(clusterInfo, values);

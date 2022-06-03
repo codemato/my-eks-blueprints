@@ -7,6 +7,7 @@ import { Construct } from 'constructs';
 import * as blueprints from '@aws-quickstart/eks-blueprints';
 import { TeamPlatform, TeamApplication } from '../teams'; // HERE WE IMPORT TEAMS
 import { KedaAddOn } from '../lib/keda_addon';
+//import { KedaAddOnProps } from '../lib/keda_addon';
 
 
 export default class PipelineConstruct extends Construct {
@@ -15,14 +16,13 @@ export default class PipelineConstruct extends Construct {
 
     const account = props?.env?.account!;
     const region = props?.env?.region!;
-
     const blueprint = blueprints.EksBlueprint.builder()
     .account(account)
     .region(region)
     .addOns(
       new blueprints.ClusterAutoScalerAddOn,
       new blueprints.KubeviousAddOn(), // New addon goes here
-      new KedaAddOn()
+      new KedaAddOn({podSecurityContextFsGroup: 1001, securityContextRunAsGroup: 1001, securityContextRunAsUser: 1001, irsaRoles: {"cloudwatch":"CloudWatchFullAccess", "sqs":"AmazonSQSFullAccess"}})
     ) 
     .teams(new TeamPlatform(account), new TeamApplication('amway',account));
   
