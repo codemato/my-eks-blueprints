@@ -6,6 +6,8 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as blueprints from '@aws-quickstart/eks-blueprints';
 import { TeamPlatform, TeamApplication } from '../teams'; // HERE WE IMPORT TEAMS
+import { KedaAddOn } from '../lib/keda_addon';
+
 
 export default class PipelineConstruct extends Construct {
   constructor(scope: Construct, id: string, props?: cdk.StackProps){
@@ -20,6 +22,7 @@ export default class PipelineConstruct extends Construct {
     .addOns(
       new blueprints.ClusterAutoScalerAddOn,
       new blueprints.KubeviousAddOn(), // New addon goes here
+      new KedaAddOn()
     ) 
     .teams(new TeamPlatform(account), new TeamApplication('amway',account));
   
