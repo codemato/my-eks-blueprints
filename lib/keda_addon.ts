@@ -84,7 +84,7 @@ function populateValues(helmOptions: KedaAddOnProps): blueprints.Values {
   setPath(values, "operator.name",  helmOptions.kedaOperatorName);
   setPath(values, "podSecurityContext.fsGroup",  helmOptions.podSecurityContextFsGroup);
   setPath(values, "securityContext.runAsGroup",  helmOptions.securityContextRunAsGroup);
-  setPath(values, "securityContext.generate_passwords",  helmOptions.securityContextRunAsUser);
+  setPath(values, "securityContext.runAsUser",  helmOptions.securityContextRunAsUser);
   setPath(values, "serviceAccount.create",  helmOptions.createServiceAccount); 
   setPath(values, "serviceAccount.name",  helmOptions.kedaServiceAccountName); 
 
