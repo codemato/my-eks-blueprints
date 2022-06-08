@@ -22,7 +22,7 @@ export default class PipelineConstruct extends Construct {
     .addOns(
       new blueprints.ClusterAutoScalerAddOn,
       new blueprints.KubeviousAddOn(), // New addon goes here
-      new KedaAddOn({podSecurityContextFsGroup: 1001, securityContextRunAsGroup: 1001, securityContextRunAsUser: 1001, irsaRoles:["CloudWatchFullAccess","AmazonSQSFullAccess"] })
+      //new KedaAddOn({podSecurityContextFsGroup: 1001, securityContextRunAsGroup: 1001, securityContextRunAsUser: 1001, irsaRoles:["CloudWatchFullAccess","AmazonSQSFullAccess"] })
     ) 
     .teams(new TeamPlatform(account), new TeamApplication('amway',account));
          // HERE WE ADD THE ARGOCD APP OF APPS REPO INFORMATION
