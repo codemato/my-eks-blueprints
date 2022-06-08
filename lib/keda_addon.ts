@@ -43,7 +43,7 @@ export interface KedaAddOnProps extends blueprints.HelmAddOnUserProps {
      */
     securityContextRunAsUser?: number,
     /**
-     * Th Dictionary of MAnaged IAM Roles which Sercice Account needs for IRSA Eg: irsaRoles: {"cloudwatch":"CloudWatchFullAccess", "sqs":"AmazonSQSFullAccess"}
+     * An array of MAnaged IAM Roles which Sercice Account needs for IRSA Eg: irsaRoles:["CloudWatchFullAccess","AmazonSQSFullAccess"]
      */   
     irsaRoles?: string[]
 }
@@ -121,9 +121,8 @@ function populateValues(helmOptions: KedaAddOnProps): blueprints.Values {
 }
 
 function setRoles(sa:any, irsaRoles: string[]){
-    irsaRoles.forEach((value) => {
-        const policyName:string = value as string;
-        const policy = ManagedPolicy.fromAwsManagedPolicyName(policyName);
-        sa.role.addManagedPolicy(policy);
-      });
+  irsaRoles.forEach((policyName) => {
+      const policy = ManagedPolicy.fromAwsManagedPolicyName(policyName);
+      sa.role.addManagedPolicy(policy);
+    });
 }
