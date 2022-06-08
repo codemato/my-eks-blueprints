@@ -20,7 +20,7 @@ export interface KedaAddOnProps extends blueprints.HelmAddOnUserProps {
      */
     kedaOperatorName?: string,
     /**
-     * Specifies whether a service account should be created by IRSA. If provided false, Service Account will be created by Keda without IRSA
+     * Specifies whether a service account should be created by by CDK with IRSA. If provided false, Service Account will be created by Keda without IRSA
      */
     enableIRSA?: boolean,
     /**
@@ -114,7 +114,7 @@ export class KedaAddOn extends blueprints.HelmAddOn {
  */
 function populateValues(helmOptions: KedaAddOnProps): blueprints.Values {
   const values = helmOptions.values ?? {};
-  
+  //In Case enableIRSA is true, code should not allow Keda to create Service Account, CDK will create Service Account with IRSA enabled
   if(helmOptions.enableIRSA === true){
     helmOptions.createServiceAccount = false;
   }
