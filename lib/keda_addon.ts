@@ -20,7 +20,11 @@ export interface KedaAddOnProps extends blueprints.HelmAddOnUserProps {
      */
     kedaOperatorName?: string,
     /**
-     * Specifies whether a service account should be created by keda. If provided false, CDK will create Service Account wth IAM Roles (IRSA). 
+     * Specifies whether a service account should be created by IRSA. If provided false, Service Account will be created by Keda without IRSA
+     */
+    enableIRSA?: boolean,
+    /**
+     * Specifies whether a service account should be created by Keda, by default its true, but in case IRSA is true it will be set to false automatically
      */
     createServiceAccount?: boolean,
     /**
@@ -59,7 +63,8 @@ const defaultProps: blueprints.HelmAddOnProps & KedaAddOnProps = {
   release: "keda",
   repository:  "https://kedacore.github.io/charts",
   values: {},
-  createServiceAccount: true,
+  enableIRSA: false,
+  createServiceAccount:true,
   kedaOperatorName: "keda-operator",
   kedaServiceAccountName: "keda-operator",
   irsaRoles: ["CloudWatchFullAccess"]
@@ -83,7 +88,7 @@ export class KedaAddOn extends blueprints.HelmAddOn {
     let values: Values = populateValues(this.options);
     values = merge(values, this.props.values ?? {});
 
-    if(this.options.createServiceAccount === false) {
+    if(this.options.enableIRSA === true) {
       const opts = { name: this.options.kedaOperatorName, namespace: this.options.namespace };
       const sa = cluster.addServiceAccount(this.options.kedaServiceAccountName!, opts);
       setRoles(sa,this.options.irsaRoles!)
@@ -109,6 +114,10 @@ export class KedaAddOn extends blueprints.HelmAddOn {
  */
 function populateValues(helmOptions: KedaAddOnProps): blueprints.Values {
   const values = helmOptions.values ?? {};
+  
+  if(helmOptions.enableIRSA === true){
+    helmOptions.createServiceAccount = false;
+  }
   // Check the workaround for SQS Scalar https://github.com/kedacore/keda/issues/837
   setPath(values, "operator.name",  helmOptions.kedaOperatorName);
   setPath(values, "podSecurityContext.fsGroup",  helmOptions.podSecurityContextFsGroup);
