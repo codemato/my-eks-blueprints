@@ -1,24 +1,51 @@
 // lib/kubevious_addon.ts
 import { Construct } from 'constructs';
 import { ManagedPolicy } from "aws-cdk-lib/aws-iam";
+import merge from "ts-deepmerge";
 import * as blueprints from '@aws-quickstart/eks-blueprints';
 import { setPath } from '@aws-quickstart/eks-blueprints/dist/utils/object-utils';
+import { ClusterInfo, Values } from "@aws-quickstart/eks-blueprints/dist/spi";
 import { createNamespace } from '@aws-quickstart/eks-blueprints/dist/utils/namespace-utils';
 
 /**
  * User provided options for the Helm Chart
  */
 export interface KedaAddOnProps extends blueprints.HelmAddOnUserProps {
-  version?: string,
-  namespace?: string,
-  kedaOperatorName?: string,
-  createServiceAccount?: boolean,
-  kedaServiceAccountName?: string,
-  podSecurityContextFsGroup?: number,
-  securityContextRunAsGroup?: number,
-  securityContextRunAsUser?: number,
-  irsaRoles?: {}
-
+    /**
+     * Version of the helm chart to deploy
+     */    
+    version?: string,
+    /**
+     * Name of the KEDA operator
+     */
+    kedaOperatorName?: string,
+    /**
+     * Specifies whether a service account should be created by keda. If provided false, CDK will create Service Account wth IAM Roles (IRSA). 
+     */
+    createServiceAccount?: boolean,
+    /**
+     * The name of the service account to use. If not set and create is true, a name is generated.
+     */
+    kedaServiceAccountName?: string,
+    /**
+     * securityContext: fsGroup
+     * Check the workaround for SQS Scalar with IRSA https://github.com/kedacore/keda/issues/837#issuecomment-789037326
+     */   
+    podSecurityContextFsGroup?: number,
+    /**
+     * securityContext:runAsUser
+     * Check the workaround for SQS Scalar with IRSA https://github.com/kedacore/keda/issues/837#issuecomment-789037326
+     */   
+    securityContextRunAsGroup?: number,
+    /**
+     * securityContext:runAsGroup
+     * Check the workaround for SQS Scalar with IRSA https://github.com/kedacore/keda/issues/837#issuecomment-789037326
+     */
+    securityContextRunAsUser?: number,
+    /**
+     * Th Dictionary of MAnaged IAM Roles which Sercice Account needs for IRSA Eg: irsaRoles: {"cloudwatch":"CloudWatchFullAccess", "sqs":"AmazonSQSFullAccess"}
+     */   
+    irsaRoles?: string[]
 }
 
 /**
@@ -26,16 +53,16 @@ export interface KedaAddOnProps extends blueprints.HelmAddOnUserProps {
  */
 const defaultProps: blueprints.HelmAddOnProps & KedaAddOnProps = {
   name: "blueprints-keda-addon",
-  namespace: "keda",
   chart: "keda",
+  namespace:"keda",
   version: "2.7.1",
   release: "keda",
   repository:  "https://kedacore.github.io/charts",
   values: {},
-  createServiceAccount: false,
+  createServiceAccount: true,
   kedaOperatorName: "keda-operator",
   kedaServiceAccountName: "keda-operator",
-  irsaRoles: {"cloudwatch":"CloudWatchFullAccess"}
+  irsaRoles: ["CloudWatchFullAccess"]
 };
 
 /**
@@ -53,7 +80,9 @@ export class KedaAddOn extends blueprints.HelmAddOn {
   deploy(clusterInfo: blueprints.ClusterInfo): Promise<Construct> {
     //Create Service Account with IRSA
     const cluster = clusterInfo.cluster;
-    let values: blueprints.Values = populateValues(this.options);
+    let values: Values = populateValues(this.options);
+    values = merge(values, this.props.values ?? {});
+
     if(this.options.createServiceAccount === false) {
       const opts = { name: this.options.kedaOperatorName, namespace: this.options.namespace };
       const sa = cluster.addServiceAccount(this.options.kedaServiceAccountName!, opts);
@@ -91,11 +120,10 @@ function populateValues(helmOptions: KedaAddOnProps): blueprints.Values {
   return values;
 }
 
-function setRoles(sa:any ,irsaRoles:{}){
-  for (let [key, value] of Object.entries(irsaRoles)) {
-      const policyName:string = value as string;
-      const policy = ManagedPolicy.fromAwsManagedPolicyName(policyName);
-      sa.role.addManagedPolicy(policy);
-  }
-  
+function setRoles(sa:any, irsaRoles: string[]){
+    irsaRoles.forEach((value) => {
+        const policyName:string = value as string;
+        const policy = ManagedPolicy.fromAwsManagedPolicyName(policyName);
+        sa.role.addManagedPolicy(policy);
+      });
 }
