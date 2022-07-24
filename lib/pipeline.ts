@@ -9,7 +9,7 @@ import * as ec2 from "aws-cdk-lib/aws-ec2";
 import { CapacityType, KubernetesVersion, NodegroupAmiType } from 'aws-cdk-lib/aws-eks';
 import { InstanceType } from 'aws-cdk-lib/aws-ec2';
 import { TeamPlatform, TeamApplication } from '../teams'; // HERE WE IMPORT TEAMS
-//import { KedaAddOn } from '../lib/keda_addon';
+import { CertManagerAddOn } from '../lib/certmanager_addon';
 //import { KedaAddOnProps } from '../lib/keda_addon';
 
 
@@ -69,7 +69,8 @@ export default class PipelineConstruct extends Construct {
       new blueprints.ClusterAutoScalerAddOn,
       new blueprints.KubeviousAddOn(), // New addon goes here
       new blueprints.IstioBaseAddOn(),
-      new blueprints.IstioControlPlaneAddOn(istioControlPlaneAddOnProps)
+      new blueprints.IstioControlPlaneAddOn(istioControlPlaneAddOnProps),
+      new CertManagerAddOn()
       
     ) 
     .clusterProvider(clusterProvider)    
