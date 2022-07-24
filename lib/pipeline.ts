@@ -5,6 +5,9 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as blueprints from '@aws-quickstart/eks-blueprints';
+import * as ec2 from "aws-cdk-lib/aws-ec2";
+import { CapacityType, KubernetesVersion, NodegroupAmiType } from 'aws-cdk-lib/aws-eks';
+import { InstanceType } from 'aws-cdk-lib/aws-ec2';
 import { TeamPlatform, TeamApplication } from '../teams'; // HERE WE IMPORT TEAMS
 //import { KedaAddOn } from '../lib/keda_addon';
 //import { KedaAddOnProps } from '../lib/keda_addon';
@@ -13,6 +16,32 @@ import { TeamPlatform, TeamApplication } from '../teams'; // HERE WE IMPORT TEAM
 export default class PipelineConstruct extends Construct {
   constructor(scope: Construct, id: string, props?: cdk.StackProps){
     super(scope,id)
+    const clusterProvider = new blueprints.GenericClusterProvider({
+        version: KubernetesVersion.V1_21,
+        managedNodeGroups: [
+            {
+                id: "mng1",
+                amiType: NodegroupAmiType.AL2_X86_64,
+                instanceTypes: [new InstanceType('m5.2xlarge')],
+                diskSize: 25,
+                nodeGroupSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT }
+            },
+            {
+                id: "mng2",
+                amiType: NodegroupAmiType.AL2_X86_64,
+                instanceTypes: [new InstanceType('m5.2xlarge')],
+                diskSize: 25,
+                nodeGroupSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT }
+            },
+            {
+                id: "mng3",
+                amiType: NodegroupAmiType.AL2_X86_64,
+                instanceTypes: [new InstanceType('m5.2xlarge')],
+                diskSize: 25,
+                nodeGroupSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT }
+            },
+        ]
+    });    
     const istioControlPlaneAddOnProps = {
       values: {
         pilot: {
@@ -43,6 +72,7 @@ export default class PipelineConstruct extends Construct {
       new blueprints.IstioControlPlaneAddOn(istioControlPlaneAddOnProps)
       
     ) 
+    .clusterProvider(clusterProvider)    
     .teams(new TeamPlatform(account), new TeamApplication('amway',account));
          // HERE WE ADD THE ARGOCD APP OF APPS REPO INFORMATION
     const repoUrl = 'https://github.com/codemato/cdk-eks-argo-workload.git';
