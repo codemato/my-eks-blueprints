@@ -6,14 +6,31 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as blueprints from '@aws-quickstart/eks-blueprints';
 import { TeamPlatform, TeamApplication } from '../teams'; // HERE WE IMPORT TEAMS
-import { KedaAddOn } from '../lib/keda_addon';
+//import { KedaAddOn } from '../lib/keda_addon';
 //import { KedaAddOnProps } from '../lib/keda_addon';
 
 
 export default class PipelineConstruct extends Construct {
   constructor(scope: Construct, id: string, props?: cdk.StackProps){
     super(scope,id)
-
+    const istioControlPlaneAddOnProps = {
+      values: {
+        pilot: {
+          autoscaleEnabled: true,
+          autoscaleMin: 1,
+          autoscaleMax: 5,
+          replicaCount: 1,
+          rollingMaxSurge: "100%",
+          rollingMaxUnavailable: "25%",
+          resources: {
+            requests: {
+              cpu: "500m",
+              memory: "2048Mi",
+            }
+          }
+        }
+      }
+    }   
     const account = props?.env?.account!;
     const region = props?.env?.region!;
     const blueprint = blueprints.EksBlueprint.builder()
@@ -22,7 +39,9 @@ export default class PipelineConstruct extends Construct {
     .addOns(
       new blueprints.ClusterAutoScalerAddOn,
       new blueprints.KubeviousAddOn(), // New addon goes here
-      new KedaAddOn({podSecurityContextFsGroup: 1001, securityContextRunAsGroup: 1001, securityContextRunAsUser: 1001, enableIRSA: true, irsaRoles:["CloudWatchFullAccess","AmazonSQSFullAccess"] })
+      new blueprints.IstioBaseAddOn(),
+      new blueprints.IstioControlPlaneAddOn(istioControlPlaneAddOnProps)
+      
     ) 
     .teams(new TeamPlatform(account), new TeamApplication('amway',account));
          // HERE WE ADD THE ARGOCD APP OF APPS REPO INFORMATION
