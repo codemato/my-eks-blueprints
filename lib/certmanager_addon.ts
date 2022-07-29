@@ -8,9 +8,14 @@ import { createNamespace } from '@aws-quickstart/eks-blueprints/dist/utils/names
  * User provided options for the Helm Chart
  */
 export interface CertManagerAddOnProps extends blueprints.HelmAddOnUserProps {
-  version?: string,
-  installCRDs?: boolean
-  createNamespace?: boolean
+    /**
+     * To automatically install and manage the CRDs as part of your Helm release,
+     */    
+    installCRDs?: boolean;
+    /**
+     * To Create Namespace using CDK
+     */    
+    createNamespace?: boolean;
 }
 
 /**
@@ -43,15 +48,20 @@ export class CertManagerAddOn extends blueprints.HelmAddOn {
 
   deploy(clusterInfo: blueprints.ClusterInfo): Promise<Construct> {
     const cluster = clusterInfo.cluster;
-    
-    if( this.options.createNamespace == true){
-      createNamespace(this.options.namespace! , cluster);
-    }
-    
     let values: blueprints.Values = populateValues(this.options);
     values = merge(values, this.props.values ?? {});
-    const chart = this.addHelmChart(clusterInfo, values);
-    return Promise.resolve(chart);
+    if( this.options.createNamespace == true){
+      // Let CDK Create the Namespace
+      const namespace = createNamespace(this.options.namespace! , cluster);
+      const chart = this.addHelmChart(clusterInfo, values);
+      chart.node.addDependency(namespace);
+      return Promise.resolve(chart);
+
+    } else {
+      //Namespace is already created
+      const chart = this.addHelmChart(clusterInfo, values);
+      return Promise.resolve(chart);
+    }
   }
 }
 
