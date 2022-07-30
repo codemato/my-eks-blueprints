@@ -11,6 +11,8 @@ import { InstanceType } from 'aws-cdk-lib/aws-ec2';
 import { TeamPlatform, TeamApplication } from '../teams'; // HERE WE IMPORT TEAMS
 import { CertManagerAddOn } from '../lib/certmanager_addon';
 //import { KedaAddOnProps } from '../lib/keda_addon';
+import { ACMPrivateCAIssuerAddon } from '../lib/aws_privateca_issuer';
+
 
 
 export default class PipelineConstruct extends Construct {
@@ -70,7 +72,8 @@ export default class PipelineConstruct extends Construct {
       new blueprints.KubeviousAddOn(), // New addon goes here
       new blueprints.IstioBaseAddOn(),
       new blueprints.IstioControlPlaneAddOn(istioControlPlaneAddOnProps),
-      new CertManagerAddOn()
+      new CertManagerAddOn(),
+      new ACMPrivateCAIssuerAddon()
       
     ) 
     .clusterProvider(clusterProvider)    

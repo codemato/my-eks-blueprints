@@ -7,15 +7,11 @@ import { dependable } from '@aws-quickstart/eks-blueprints/dist/utils/';
 import { setPath } from '@aws-quickstart/eks-blueprints/dist/utils/object-utils';
 import { ClusterInfo, Values } from "@aws-quickstart/eks-blueprints/dist/spi";
 import { createNamespace } from '@aws-quickstart/eks-blueprints/dist/utils/namespace-utils';
-
+import { CertManagerAddOn } from '../lib/certmanager_addon';
 /**
  * User provided options for the Helm Chart
  */
 export interface ACMPrivateCAIssuerAddonProps extends blueprints.HelmAddOnUserProps {
-    /**
-     * Version of the helm chart to deploy
-     */    
-    version?: string;
     /**
      * Specifies whether a service account should be created
      */
@@ -55,6 +51,7 @@ export class ACMPrivateCAIssuerAddon extends blueprints.HelmAddOn {
     this.options = this.props as ACMPrivateCAIssuerAddonProps;
   }
 
+  @dependable('CertManagerAddOn')
   deploy(clusterInfo: blueprints.ClusterInfo): Promise<Construct> {
     //Create Service Account with IRSA
     const cluster = clusterInfo.cluster;
@@ -72,7 +69,7 @@ export class ACMPrivateCAIssuerAddon extends blueprints.HelmAddOn {
       sa.node.addDependency(namespace);
       
       const chart = this.addHelmChart(clusterInfo, values);
-      //chart.node.addDependency(sa);
+      chart.node.addDependency(sa);
       return Promise.resolve(chart);
 
     } else {
