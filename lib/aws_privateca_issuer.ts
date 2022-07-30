@@ -28,7 +28,7 @@ export interface ACMPrivateCAIssuerAddonProps extends blueprints.HelmAddOnUserPr
  */
 const defaultProps: blueprints.HelmAddOnProps & ACMPrivateCAIssuerAddonProps = {
   name: "blueprints-aws-pca-issuer-addon",
-  chart: "aws-pca-issuer",
+  chart: "awspca/aws-privateca-issuer",
   namespace:"aws-pca-issuer",
   version: "1.2.2",
   release: "aws-pca-issuer",
