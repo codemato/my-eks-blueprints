@@ -73,7 +73,7 @@ export default class PipelineConstruct extends Construct {
       new blueprints.IstioBaseAddOn(),
       new blueprints.IstioControlPlaneAddOn(istioControlPlaneAddOnProps),
       new CertManagerAddOn(),
-      //new AWSPrivateCAIssuerAddon()
+      new AWSPrivateCAIssuerAddon()
       
     ) 
     .clusterProvider(clusterProvider)    
