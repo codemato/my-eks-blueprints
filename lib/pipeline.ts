@@ -64,6 +64,9 @@ export default class PipelineConstruct extends Construct {
     }   
     const account = props?.env?.account!;
     const region = props?.env?.region!;
+    const awsPcaParams = {
+	    irsaRoles: ["AWSCertificateManagerPrivateCAFullAccess"]
+    }
     const blueprint = blueprints.EksBlueprint.builder()
     .account(account)
     .region(region)
@@ -73,7 +76,7 @@ export default class PipelineConstruct extends Construct {
       new blueprints.IstioBaseAddOn(),
       new blueprints.IstioControlPlaneAddOn(istioControlPlaneAddOnProps),
       new CertManagerAddOn(),
-      new AWSPrivateCAIssuerAddon()
+      new AWSPrivateCAIssuerAddon(awsPcaParams)
       
     ) 
     .clusterProvider(clusterProvider)    
