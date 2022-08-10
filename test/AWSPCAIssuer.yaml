@@ -1,0 +1,8 @@
+apiVersion: awspca.cert-manager.io/v1beta1
+kind: AWSPCAIssuer
+metadata:
+  name: demo-awspcs-issuer
+  namespace: acm-pca-demo
+spec:
+  arn: arn:aws:acm-pca:us-west-2:297410919161:certificate-authority/3c5e356d-29c8-43b4-af3b-367bb2a66edb
+  region: us-west-2

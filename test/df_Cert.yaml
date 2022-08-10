@@ -1,0 +1,21 @@
+kind: Certificate
+apiVersion: cert-manager.io/v1
+metadata:
+  name: app.deepfactor.io
+spec:
+  commonName: app.deepfactor.io
+  dnsNames:
+    - app.deepfactor.io
+  duration: 2160h0m0s
+  issuerRef:
+    group: awspca.cert-manager.io
+    kind: AWSPCAIssuer
+    name: df-awspcs-issuer
+  renewBefore: 360h0m0s
+  secretName: app.deepfactor.io
+  usages:
+    - server auth
+    - client auth
+  privateKey:
+    algorithm: "RSA"
+    size: 2048
